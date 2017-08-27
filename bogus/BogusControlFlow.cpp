@@ -368,7 +368,7 @@ BasicBlock *BogusControlFlow::createAlteredBasicBlock(BasicBlock *basicBlock,
     for (User::op_iterator opi = i->op_begin(), ope = i->op_end(); opi != ope;
          ++opi) {
       // get the value for the operand
-      Value *v = MapValue(*opi, VMap, RF_None, 0);
+      Value *v = MapValue(*opi, VMap, RF_NoModuleLevelChanges, 0);
       if (v != 0) {
         *opi = v;
         DEBUG_WITH_TYPE("gen", errs()
