@@ -529,7 +529,7 @@ namespace {
       for(Module::iterator mi = M.begin(), me = M.end(); mi != me; ++mi){
         for(Function::iterator fi = mi->begin(), fe = mi->end(); fi != fe; ++fi){
           //fi->setName("");
-          TerminatorInst * tbb= fi->getTerminator();
+          Instruction * tbb= fi->getTerminator();
           if(tbb->getOpcode() == Instruction::Br){
             BranchInst * br = (BranchInst *)(tbb);
             if(br->isConditional()){
