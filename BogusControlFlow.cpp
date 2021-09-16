@@ -365,6 +365,7 @@ namespace {
         if(i->isBinaryOp()){ // binary instructions
           unsigned opcode = i->getOpcode();
           BinaryOperator *op, *op1 = NULL;
+          UnaryOperator *op2;
           Twine *var = new Twine("_");
           // treat differently float or int
           // Binary int
@@ -404,8 +405,8 @@ namespace {
               switch(llvm::cryptoutils->get_range(3)){ // can be improved
                 case 0: //do nothing
                   break;
-                case 1: op = BinaryOperator::CreateFNeg(i->getOperand(0),*var,&*i);
-                        op1 = BinaryOperator::Create(Instruction::FAdd,op,
+                case 1: op2 = UnaryOperator::CreateFNeg(i->getOperand(0),*var,&*i);
+                        op1 = BinaryOperator::Create(Instruction::FAdd,op2,
                             i->getOperand(1),"gen",&*i);
                         break;
                 case 2: op = BinaryOperator::Create(Instruction::FSub,
