@@ -555,8 +555,8 @@ namespace {
       // Replacing all the branches we found
       for(std::vector<Instruction*>::iterator i =toEdit.begin();i!=toEdit.end();++i){
         //if y < 10 || x*(x+1) % 2 == 0
-        opX = new LoadInst ((Value *)x, "", (*i));
-        opY = new LoadInst ((Value *)y, "", (*i));
+        opX = new LoadInst (x->getType()->getElementType(), (Value *)x, "", (*i));
+        opY = new LoadInst (y->getType()->getElementType(), (Value *)y, "", (*i));
 
         op = BinaryOperator::Create(Instruction::Sub, (Value *)opX,
             ConstantInt::get(Type::getInt32Ty(M.getContext()), 1,
