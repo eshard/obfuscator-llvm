@@ -16,20 +16,11 @@
 #include "utils/Utils.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/PassManager.h"
-#include "llvm/Passes/PassBuilder.h"
-#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace llvm {
 
 #define DEBUG_TYPE "substitution"
-
-#define NUMBER_ADD_SUBST 4
-#define NUMBER_SUB_SUBST 3
-#define NUMBER_AND_SUBST 2
-#define NUMBER_OR_SUBST 2
-#define NUMBER_XOR_SUBST 2
 
 static cl::opt<int>
     ObfTimes("sub_loop",
@@ -47,73 +38,44 @@ STATISTIC(And, "And substitued");
 STATISTIC(Or, "Or substitued");
 STATISTIC(Xor, "Xor substitued");
 
-namespace {
+Substitution::Substitution() { registerFuncs(); }
 
-struct Substitution {
-  Substitution() { registerFuncs(); }
-  Substitution(bool flag) {
-    registerFuncs();
-    this->flag = flag;
-  }
-  void registerFuncs() {
-    funcAdd[0] = &Substitution::addNeg;
-    funcAdd[1] = &Substitution::addDoubleNeg;
-    funcAdd[2] = &Substitution::addRand;
-    funcAdd[3] = &Substitution::addRand2;
+Substitution::Substitution(bool flag) {
+  registerFuncs();
+  this->flag = flag;
+}
 
-    funcSub[0] = &Substitution::subNeg;
-    funcSub[1] = &Substitution::subRand;
-    funcSub[2] = &Substitution::subRand2;
+void Substitution::registerFuncs() {
+  funcAdd[0] = &Substitution::addNeg;
+  funcAdd[1] = &Substitution::addDoubleNeg;
+  funcAdd[2] = &Substitution::addRand;
+  funcAdd[3] = &Substitution::addRand2;
 
-    funcAnd[0] = &Substitution::andSubstitution;
-    funcAnd[1] = &Substitution::andSubstitutionRand;
+  funcSub[0] = &Substitution::subNeg;
+  funcSub[1] = &Substitution::subRand;
+  funcSub[2] = &Substitution::subRand2;
 
-    funcOr[0] = &Substitution::orSubstitution;
-    funcOr[1] = &Substitution::orSubstitutionRand;
+  funcAnd[0] = &Substitution::andSubstitution;
+  funcAnd[1] = &Substitution::andSubstitutionRand;
 
-    funcXor[0] = &Substitution::xorSubstitution;
-    funcXor[1] = &Substitution::xorSubstitutionRand;
-  }
+  funcOr[0] = &Substitution::orSubstitution;
+  funcOr[1] = &Substitution::orSubstitutionRand;
 
-  bool runSubstitution(Function &F);
-  bool substitute(Function *f);
+  funcXor[0] = &Substitution::xorSubstitution;
+  funcXor[1] = &Substitution::xorSubstitutionRand;
+}
 
-  void addNeg(BinaryOperator *bo);
-  void addDoubleNeg(BinaryOperator *bo);
-  void addRand(BinaryOperator *bo);
-  void addRand2(BinaryOperator *bo);
+SubstitutionPass::SubstitutionPass() {
+  // TODO
+  // Implicit with new Pass Manager ?
+  this->flag = true;
+}
 
-  void subNeg(BinaryOperator *bo);
-  void subRand(BinaryOperator *bo);
-  void subRand2(BinaryOperator *bo);
-
-  void andSubstitution(BinaryOperator *bo);
-  void andSubstitutionRand(BinaryOperator *bo);
-
-  void orSubstitution(BinaryOperator *bo);
-  void orSubstitutionRand(BinaryOperator *bo);
-
-  void xorSubstitution(BinaryOperator *bo);
-  void xorSubstitutionRand(BinaryOperator *bo);
-
-  void (Substitution::*funcAdd[NUMBER_ADD_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcSub[NUMBER_SUB_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcAnd[NUMBER_AND_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcOr[NUMBER_OR_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcXor[NUMBER_XOR_SUBST])(BinaryOperator *bo);
-  bool flag;
-};
-
-struct SubstitutionPass : public PassInfoMixin<SubstitutionPass>,
-                          public Substitution {
-  SubstitutionPass() {
-    // TODO
-    // Implicit with new Pass Manager ?
-    this->flag = true;
-  }
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
-};
+PreservedAnalyses SubstitutionPass::run(Function &F,
+                                        FunctionAnalysisManager &AM) {
+  return runSubstitution(F) ? PreservedAnalyses::none()
+                            : PreservedAnalyses::all();
+}
 
 struct LegacySubstitution : public FunctionPass, public Substitution {
   static char ID; // Pass identification, replacement for typeid
@@ -123,36 +85,14 @@ struct LegacySubstitution : public FunctionPass, public Substitution {
 
   bool runOnFunction(Function &F);
 };
-} // namespace
 
 char LegacySubstitution::ID = 0;
 static RegisterPass<LegacySubstitution> X("substitution",
                                           "operators substitution");
 Pass *createSubstitution(bool flag) { return new LegacySubstitution(flag); }
 
-extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "SubstitutionObfuscatorPass", "v0.1",
-          [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "substitution-obfuscator-pass") {
-                    FPM.addPass(SubstitutionPass());
-                    return true;
-                  }
-                  return false;
-                });
-          }};
-}
-
 bool LegacySubstitution::runOnFunction(Function &F) {
   return runSubstitution(F);
-}
-
-PreservedAnalyses SubstitutionPass::run(Function &F,
-                                        FunctionAnalysisManager &AM) {
-  return runSubstitution(F) ? PreservedAnalyses::none()
-                            : PreservedAnalyses::all();
 }
 
 bool Substitution::runSubstitution(Function &F) {

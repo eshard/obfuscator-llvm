@@ -28,6 +28,22 @@
 
 // Namespace
 namespace llvm {
-Pass *createSplitBasicBlock(bool flag);
-}
+struct SplitBasicBlock {
+  bool flag;
+
+  SplitBasicBlock() {}
+
+  bool runSplitBasicBlock(Function &F);
+  void split(Function *f);
+
+  bool containsPHI(BasicBlock *b);
+  void shuffle(std::vector<int> &vec);
+};
+
+struct SplitBasicBlockPass : public PassInfoMixin<SplitBasicBlockPass>,
+                             public SplitBasicBlock {
+  SplitBasicBlockPass() {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+};
+} // namespace llvm
 #endif

@@ -30,19 +30,6 @@ STATISTIC(Split, "Basicblock splitted");
 static cl::opt<int> SplitNum("split_num", cl::init(2),
                              cl::desc("Split <split_num> time each BB"));
 
-namespace {
-struct SplitBasicBlock {
-  bool flag;
-
-  SplitBasicBlock() {}
-
-  bool runSplitBasicBlock(Function &F);
-  void split(Function *f);
-
-  bool containsPHI(BasicBlock *b);
-  void shuffle(std::vector<int> &vec);
-};
-
 struct LegacySplitBasicBlock : public FunctionPass, public SplitBasicBlock {
   static char ID; // Pass identification, replacement for typeid
 
@@ -52,36 +39,9 @@ struct LegacySplitBasicBlock : public FunctionPass, public SplitBasicBlock {
   bool runOnFunction(Function &F);
 };
 
-struct SplitBasicBlockPass : public PassInfoMixin<SplitBasicBlockPass>,
-                             public SplitBasicBlock {
-  SplitBasicBlockPass() {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
-};
-} // namespace
-
 char LegacySplitBasicBlock::ID = 0;
 static RegisterPass<LegacySplitBasicBlock> X("splitbbl",
                                              "BasicBlock splitting");
-
-Pass *createSplitBasicBlock(bool flag) {
-  return new LegacySplitBasicBlock(flag);
-}
-
-extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "SplitBasicBlockPass", "v0.1",
-          [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "split-basic-block-obfuscator-pass") {
-                    FPM.addPass(SplitBasicBlockPass());
-                    return true;
-                  }
-                  return false;
-                });
-          }};
-}
 
 bool LegacySplitBasicBlock::runOnFunction(Function &F) {
   return runSplitBasicBlock(F);
@@ -182,5 +142,4 @@ void SplitBasicBlock::shuffle(std::vector<int> &vec) {
     std::swap(vec[i], vec[cryptoutils->get_uint32_t() % (i + 1)]);
   }
 }
-
 } // namespace llvm

@@ -8,7 +8,7 @@ endif()
 
 add_definitions("-D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS")
 
-add_library(LLVMObfuscator SHARED)
+add_library(LLVMObfuscator SHARED Plugin.cpp)
 
 target_include_directories(LLVMObfuscator PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_SOURCE_DIR})
