@@ -16,7 +16,12 @@
 #include "utils/Utils.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
+
+namespace llvm {
 
 #define DEBUG_TYPE "substitution"
 
@@ -44,19 +49,13 @@ STATISTIC(Xor, "Xor substitued");
 
 namespace {
 
-struct Substitution : public FunctionPass {
-  static char ID; // Pass identification, replacement for typeid
-  void (Substitution::*funcAdd[NUMBER_ADD_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcSub[NUMBER_SUB_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcAnd[NUMBER_AND_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcOr[NUMBER_OR_SUBST])(BinaryOperator *bo);
-  void (Substitution::*funcXor[NUMBER_XOR_SUBST])(BinaryOperator *bo);
-  bool flag;
-
-  Substitution() : FunctionPass(ID) {}
-
-  Substitution(bool flag) : FunctionPass(ID) {
+struct Substitution {
+  Substitution() { registerFuncs(); }
+  Substitution(bool flag) {
+    registerFuncs();
     this->flag = flag;
+  }
+  void registerFuncs() {
     funcAdd[0] = &Substitution::addNeg;
     funcAdd[1] = &Substitution::addDoubleNeg;
     funcAdd[2] = &Substitution::addRand;
@@ -76,7 +75,7 @@ struct Substitution : public FunctionPass {
     funcXor[1] = &Substitution::xorSubstitutionRand;
   }
 
-  bool runOnFunction(Function &F);
+  bool runSubstitution(Function &F);
   bool substitute(Function *f);
 
   void addNeg(BinaryOperator *bo);
@@ -96,14 +95,67 @@ struct Substitution : public FunctionPass {
 
   void xorSubstitution(BinaryOperator *bo);
   void xorSubstitutionRand(BinaryOperator *bo);
+
+  void (Substitution::*funcAdd[NUMBER_ADD_SUBST])(BinaryOperator *bo);
+  void (Substitution::*funcSub[NUMBER_SUB_SUBST])(BinaryOperator *bo);
+  void (Substitution::*funcAnd[NUMBER_AND_SUBST])(BinaryOperator *bo);
+  void (Substitution::*funcOr[NUMBER_OR_SUBST])(BinaryOperator *bo);
+  void (Substitution::*funcXor[NUMBER_XOR_SUBST])(BinaryOperator *bo);
+  bool flag;
+};
+
+struct SubstitutionPass : public PassInfoMixin<SubstitutionPass>,
+                          public Substitution {
+  SubstitutionPass() {
+    // TODO
+    // Implicit with new Pass Manager ?
+    this->flag = true;
+  }
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
+
+struct LegacySubstitution : public FunctionPass, public Substitution {
+  static char ID; // Pass identification, replacement for typeid
+
+  LegacySubstitution() : FunctionPass(ID) {}
+  LegacySubstitution(bool flag) : FunctionPass(ID) {}
+
+  bool runOnFunction(Function &F);
 };
 } // namespace
 
-char Substitution::ID = 0;
-static RegisterPass<Substitution> X("substitution", "operators substitution");
-Pass *llvm::createSubstitution(bool flag) { return new Substitution(flag); }
+char LegacySubstitution::ID = 0;
+static RegisterPass<LegacySubstitution> X("substitution",
+                                          "operators substitution");
+Pass *createSubstitution(bool flag) { return new LegacySubstitution(flag); }
 
-bool Substitution::runOnFunction(Function &F) {
+extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "SubstitutionObfuscatorPass", "v0.1",
+          [](PassBuilder &PB) {
+            PB.registerPipelineParsingCallback(
+                [](StringRef Name, FunctionPassManager &FPM,
+                   ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "substitution-obfuscator-pass") {
+                    FPM.addPass(SubstitutionPass());
+                    return true;
+                  }
+                  return false;
+                });
+          }};
+}
+
+bool LegacySubstitution::runOnFunction(Function &F) {
+  return runSubstitution(F);
+}
+
+PreservedAnalyses SubstitutionPass::run(Function &F,
+                                        FunctionAnalysisManager &AM) {
+  return runSubstitution(F) ? PreservedAnalyses::none()
+                            : PreservedAnalyses::all();
+}
+
+bool Substitution::runSubstitution(Function &F) {
   // Check if the percentage is correct
   if (ObfTimes <= 0) {
     errs() << "Substitution application number -sub_loop=x must be x > 0";
@@ -575,3 +627,5 @@ void Substitution::xorSubstitutionRand(BinaryOperator *bo) {
   op = BinaryOperator::Create(Instruction::Xor, op, op1, "", bo);
   bo->replaceAllUsesWith(op);
 }
+
+} // namespace llvm
