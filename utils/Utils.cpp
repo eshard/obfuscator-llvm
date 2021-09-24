@@ -1,7 +1,7 @@
 #include "Utils.h"
+#include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include <sstream>
-#include "llvm/IR/Module.h"
 
 // Shamefully borrowed from ../Scalar/RegToMem.cpp :(
 bool valueEscapes(Instruction *Inst) {
@@ -107,7 +107,7 @@ bool toObfuscate(bool flag, Function *f, std::string attribute) {
   }
 
   // Check external linkage
-  if(f->hasAvailableExternallyLinkage() != 0) {
+  if (f->hasAvailableExternallyLinkage() != 0) {
     return false;
   }
 
@@ -145,4 +145,3 @@ bool toObfuscate(bool flag, Function *f, std::string attribute) {
 
   return false;
 }
-

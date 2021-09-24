@@ -12,8 +12,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "SplitBasicBlocks.h"
-#include "utils/Utils.h"
 #include "utils/CryptoUtils.h"
+#include "utils/Utils.h"
 
 #define DEBUG_TYPE "split"
 
@@ -32,10 +32,7 @@ struct SplitBasicBlock : public FunctionPass {
   bool flag;
 
   SplitBasicBlock() : FunctionPass(ID) {}
-  SplitBasicBlock(bool flag) : FunctionPass(ID) {
-    
-    this->flag = flag;
-  }
+  SplitBasicBlock(bool flag) : FunctionPass(ID) { this->flag = flag; }
 
   bool runOnFunction(Function &F);
   void split(Function *f);
@@ -43,7 +40,7 @@ struct SplitBasicBlock : public FunctionPass {
   bool containsPHI(BasicBlock *b);
   void shuffle(std::vector<int> &vec);
 };
-}
+} // namespace
 
 char SplitBasicBlock::ID = 0;
 static RegisterPass<SplitBasicBlock> X("splitbbl", "BasicBlock splitting");
@@ -55,7 +52,7 @@ Pass *llvm::createSplitBasicBlock(bool flag) {
 bool SplitBasicBlock::runOnFunction(Function &F) {
   // Check if the number of applications is correct
   if (!((SplitNum > 1) && (SplitNum <= 10))) {
-    errs()<<"Split application basic block percentage\
+    errs() << "Split application basic block percentage\
             -split_num=x must be 1 < x <= 10";
     return false;
   }
@@ -117,7 +114,7 @@ void SplitBasicBlock::split(Function *f) {
         ++it;
       }
       last = test[i];
-      if(toSplit->size() < 2)
+      if (toSplit->size() < 2)
         continue;
       toSplit = toSplit->splitBasicBlock(it, toSplit->getName() + ".split");
     }
@@ -141,4 +138,3 @@ void SplitBasicBlock::shuffle(std::vector<int> &vec) {
     std::swap(vec[i], vec[cryptoutils->get_uint32_t() % (i + 1)]);
   }
 }
-
