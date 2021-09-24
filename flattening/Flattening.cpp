@@ -14,7 +14,14 @@
 #include "Flattening.h"
 #include "utils/CryptoUtils.h"
 #include "utils/Utils.h"
+#include "llvm/Analysis/AssumptionCache.h"
+#include "llvm/Analysis/LazyValueInfo.h"
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Utils.h"
+#include "llvm/Transforms/Utils/LowerSwitch.h"
 
 #define DEBUG_TYPE "flattening"
 
@@ -23,34 +30,7 @@ using namespace llvm;
 // Stats
 STATISTIC(Flattened, "Functions flattened");
 
-namespace {
-struct Flattening : public FunctionPass {
-  static char ID; // Pass identification, replacement for typeid
-  bool flag;
-
-  Flattening() : FunctionPass(ID) {}
-  Flattening(bool flag) : FunctionPass(ID) { this->flag = flag; }
-
-  bool runOnFunction(Function &F);
-  bool flatten(Function *f);
-};
-} // namespace
-
-char Flattening::ID = 0;
-static RegisterPass<Flattening> X("flattening", "Call graph flattening");
-Pass *llvm::createFlattening(bool flag) { return new Flattening(flag); }
-
-bool Flattening::runOnFunction(Function &F) {
-  Function *tmp = &F;
-  // Do we obfuscate
-  if (toObfuscate(flag, tmp, "fla")) {
-    if (flatten(tmp)) {
-      ++Flattened;
-    }
-  }
-
-  return false;
-}
+namespace llvm {
 
 bool Flattening::flatten(Function *f) {
   vector<BasicBlock *> origBB;
@@ -59,18 +39,10 @@ bool Flattening::flatten(Function *f) {
   LoadInst *load;
   SwitchInst *switchI;
   AllocaInst *switchVar;
-
   // SCRAMBLER
   char scrambling_key[16];
   llvm::cryptoutils->get_bytes(scrambling_key, 16);
   // END OF SCRAMBLER
-
-  /* TODO: is this necessary ?
-  // Lower switch
-  FunctionPass *lower = createLowerSwitchPass();
-  lower->runOnFunction(*f);
-  */
-
   // Save all original BB
   for (Function::iterator i = f->begin(); i != f->end(); ++i) {
     BasicBlock *tmp = &*i;
@@ -86,7 +58,6 @@ bool Flattening::flatten(Function *f) {
   if (origBB.size() <= 1) {
     return false;
   }
-
   // Remove first BB
   origBB.erase(origBB.begin());
 
@@ -123,7 +94,6 @@ bool Flattening::flatten(Function *f) {
       ConstantInt::get(Type::getInt32Ty(f->getContext()),
                        llvm::cryptoutils->scramble32(0, scrambling_key)),
       switchVar, insert);
-
   // Create main loop
   loopEntry = BasicBlock::Create(f->getContext(), "loopEntry", f, insert);
   loopEnd = BasicBlock::Create(f->getContext(), "loopEnd", f, insert);
@@ -150,7 +120,6 @@ bool Flattening::flatten(Function *f) {
   f->begin()->getTerminator()->eraseFromParent();
 
   BranchInst::Create(loopEntry, &*f->begin());
-
   // Put all BB in the switch
   for (vector<BasicBlock *>::iterator b = origBB.begin(); b != origBB.end();
        ++b) {
@@ -166,7 +135,6 @@ bool Flattening::flatten(Function *f) {
         llvm::cryptoutils->scramble32(switchI->getNumCases(), scrambling_key)));
     switchI->addCase(numCase, i);
   }
-
   // Recalculate switchVar
   for (vector<BasicBlock *>::iterator b = origBB.begin(); b != origBB.end();
        ++b) {
@@ -244,3 +212,39 @@ bool Flattening::flatten(Function *f) {
 
   return true;
 }
+
+bool Flattening::runFlattening(Function &F) {
+  Function *tmp = &F;
+  // Do we obfuscate
+  if (toObfuscate(true, tmp, "fla")) {
+    if (flatten(tmp)) {
+      ++Flattened;
+    }
+  }
+
+  return false;
+}
+
+struct LegacyFlattening : public FunctionPass, public Flattening {
+  static char ID; // Pass identification, replacement for typeid
+  bool flag;
+
+  LegacyFlattening() : FunctionPass(ID) {}
+  LegacyFlattening(bool flag) : FunctionPass(ID) { this->flag = flag; }
+
+  bool runOnFunction(Function &F);
+};
+
+bool LegacyFlattening::runOnFunction(Function &F) { return runFlattening(F); }
+
+FlatteningObfuscatorPass::FlatteningObfuscatorPass() {}
+
+PreservedAnalyses FlatteningObfuscatorPass::run(Function &F,
+                                                FunctionAnalysisManager &) {
+  return runFlattening(F) ? PreservedAnalyses::all()
+                          : PreservedAnalyses::none();
+}
+
+char LegacyFlattening::ID = 0;
+static RegisterPass<LegacyFlattening> X("flattening", "Call flattening");
+} // namespace llvm

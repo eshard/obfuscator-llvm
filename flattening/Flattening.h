@@ -15,13 +15,11 @@
 #define _FLATTENING_INCLUDES_
 
 // LLVM include
-#include "utils/CryptoUtils.h"
-#include "utils/Utils.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
-#include "llvm/Support/CommandLine.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils/Local.h" // For DemoteRegToStack and DemotePHIToStack
@@ -30,8 +28,21 @@
 using namespace std;
 
 namespace llvm {
-Pass *createFlattening();
-Pass *createFlattening(bool flag);
+struct Flattening {
+  bool flag;
+
+  Flattening() {}
+
+  bool runFlattening(Function &F);
+  bool flatten(Function *f);
+};
+
+struct FlatteningObfuscatorPass
+    : public PassInfoMixin<FlatteningObfuscatorPass>,
+      public Flattening {
+  FlatteningObfuscatorPass();
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+};
 } // namespace llvm
 
 #endif
