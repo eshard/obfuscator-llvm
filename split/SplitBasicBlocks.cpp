@@ -14,11 +14,15 @@
 #include "SplitBasicBlocks.h"
 #include "utils/CryptoUtils.h"
 #include "utils/Utils.h"
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 
 #define DEBUG_TYPE "split"
 
-using namespace llvm;
 using namespace std;
+
+namespace llvm {
 
 // Stats
 STATISTIC(Split, "Basicblock splitted");
@@ -27,29 +31,69 @@ static cl::opt<int> SplitNum("split_num", cl::init(2),
                              cl::desc("Split <split_num> time each BB"));
 
 namespace {
-struct SplitBasicBlock : public FunctionPass {
-  static char ID; // Pass identification, replacement for typeid
+struct SplitBasicBlock {
   bool flag;
 
-  SplitBasicBlock() : FunctionPass(ID) {}
-  SplitBasicBlock(bool flag) : FunctionPass(ID) { this->flag = flag; }
+  SplitBasicBlock() {}
 
-  bool runOnFunction(Function &F);
+  bool runSplitBasicBlock(Function &F);
   void split(Function *f);
 
   bool containsPHI(BasicBlock *b);
   void shuffle(std::vector<int> &vec);
 };
+
+struct LegacySplitBasicBlock : public FunctionPass, public SplitBasicBlock {
+  static char ID; // Pass identification, replacement for typeid
+
+  LegacySplitBasicBlock() : FunctionPass(ID) {}
+  LegacySplitBasicBlock(bool flag) : FunctionPass(ID) { this->flag = flag; }
+
+  bool runOnFunction(Function &F);
+};
+
+struct SplitBasicBlockPass : public PassInfoMixin<SplitBasicBlockPass>,
+                             public SplitBasicBlock {
+  SplitBasicBlockPass() {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
 } // namespace
 
-char SplitBasicBlock::ID = 0;
-static RegisterPass<SplitBasicBlock> X("splitbbl", "BasicBlock splitting");
+char LegacySplitBasicBlock::ID = 0;
+static RegisterPass<LegacySplitBasicBlock> X("splitbbl",
+                                             "BasicBlock splitting");
 
-Pass *llvm::createSplitBasicBlock(bool flag) {
-  return new SplitBasicBlock(flag);
+Pass *createSplitBasicBlock(bool flag) {
+  return new LegacySplitBasicBlock(flag);
 }
 
-bool SplitBasicBlock::runOnFunction(Function &F) {
+extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "SplitBasicBlockPass", "v0.1",
+          [](PassBuilder &PB) {
+            PB.registerPipelineParsingCallback(
+                [](StringRef Name, FunctionPassManager &FPM,
+                   ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "split-basic-block-obfuscator-pass") {
+                    FPM.addPass(SplitBasicBlockPass());
+                    return true;
+                  }
+                  return false;
+                });
+          }};
+}
+
+bool LegacySplitBasicBlock::runOnFunction(Function &F) {
+  return runSplitBasicBlock(F);
+}
+
+PreservedAnalyses SplitBasicBlockPass::run(Function &F,
+                                           FunctionAnalysisManager &AM) {
+  return runSplitBasicBlock(F) ? PreservedAnalyses::none()
+                               : PreservedAnalyses::all();
+}
+
+bool SplitBasicBlock::runSplitBasicBlock(Function &F) {
   // Check if the number of applications is correct
   if (!((SplitNum > 1) && (SplitNum <= 10))) {
     errs() << "Split application basic block percentage\
@@ -138,3 +182,5 @@ void SplitBasicBlock::shuffle(std::vector<int> &vec) {
     std::swap(vec[i], vec[cryptoutils->get_uint32_t() % (i + 1)]);
   }
 }
+
+} // namespace llvm
