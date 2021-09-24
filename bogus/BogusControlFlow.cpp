@@ -97,6 +97,8 @@
 #include "BogusControlFlow.h"
 #include "utils/Utils.h"
 
+namespace llvm {
+
 // Stats
 #define DEBUG_TYPE "BogusControlFlow"
 STATISTIC(NumFunction, "a. Number of functions in this module");
@@ -126,21 +128,12 @@ static cl::opt<int>
              cl::Optional);
 
 namespace {
-struct BogusControlFlow : public FunctionPass {
-  static char ID; // Pass identification
+struct BogusControlFlow {
+  BogusControlFlow() {}
+  BogusControlFlow(bool flag) { this->flag = true; }
   bool flag;
-  BogusControlFlow() : FunctionPass(ID) {}
-  BogusControlFlow(bool flag) : FunctionPass(ID) {
-    this->flag = flag;
-    BogusControlFlow();
-  }
 
-  /* runOnFunction
-   *
-   * Overwrite FunctionPass method to apply the transformation
-   * to the function. See header for more details.
-   */
-  virtual bool runOnFunction(Function &F) {
+  bool runBogusControlFlow(Function &F) {
     // Check if the percentage is correct
     if (ObfTimes <= 0) {
       errs() << "BogusControlFlow application number -bcf_loop=x must be x > 0";
@@ -161,7 +154,7 @@ struct BogusControlFlow : public FunctionPass {
     }
 
     return false;
-  } // end of runOnFunction()
+  }
 
   void bogus(Function &F) {
     // For statistics and debug
@@ -670,13 +663,41 @@ struct BogusControlFlow : public FunctionPass {
 
     return true;
   } // end of doFinalization
-};  // end of struct BogusControlFlow : public FunctionPass
+};
+
+struct LegacyBogusControlFlow : public FunctionPass, public BogusControlFlow {
+  static char ID; // Pass identification
+  LegacyBogusControlFlow() : FunctionPass(ID) {}
+  LegacyBogusControlFlow(bool flag) : FunctionPass(ID) { this->flag = flag; }
+
+  /* runOnFunction
+   *
+   * Overwrite FunctionPass method to apply the transformation
+   * to the function. See header for more details.
+   */
+  virtual bool runOnFunction(Function &F) {
+    return runBogusControlFlow(F);
+  } // end of runOnFunction()
+
+}; // end of struct BogusControlFlow : public FunctionPass
+
+struct BogusControlFlowPass : public PassInfoMixin<BogusControlFlowPass>,
+                              public BogusControlFlow {
+  BogusControlFlowPass() {
+    // TODO
+    // Implicit with new Pass Manager ?
+    this->flag = true;
+  }
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+};
 } // namespace
 
-char BogusControlFlow::ID = 0;
-static RegisterPass<BogusControlFlow> X("boguscf",
-                                        "inserting bogus control flow");
+char LegacyBogusControlFlow::ID = 0;
+static RegisterPass<LegacyBogusControlFlow> X("boguscf",
+                                              "inserting bogus control flow");
 
-Pass *llvm::createBogus() { return new BogusControlFlow(); }
+Pass *createBogus() { return new LegacyBogusControlFlow(); }
 
-Pass *llvm::createBogus(bool flag) { return new BogusControlFlow(flag); }
+Pass *createBogus(bool flag) { return new LegacyBogusControlFlow(flag); }
+
+} // namespace llvm
