@@ -34,7 +34,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Transforms/IPO.h"
-#include "llvm/CryptoUtils.h"
+#include "utils/CryptoUtils.h"
 #include <list>
 
 using namespace std;

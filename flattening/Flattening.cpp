@@ -11,10 +11,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Transforms/Obfuscation/Flattening.h"
+#include "Flattening.h"
 #include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Utils.h"
-#include "llvm/CryptoUtils.h"
+#include "utils/Utils.h"
+#include "utils/CryptoUtils.h"
 
 #define DEBUG_TYPE "flattening"
 
@@ -65,9 +65,11 @@ bool Flattening::flatten(Function *f) {
   llvm::cryptoutils->get_bytes(scrambling_key, 16);
   // END OF SCRAMBLER
 
+  /* TODO: is this necessary ?
   // Lower switch
   FunctionPass *lower = createLowerSwitchPass();
   lower->runOnFunction(*f);
+  */
 
   // Save all original BB
   for (Function::iterator i = f->begin(); i != f->end(); ++i) {

@@ -90,8 +90,8 @@
 //
 //===----------------------------------------------------------------------------------===//
 
-#include "llvm/Transforms/Obfuscation/BogusControlFlow.h"
-#include "llvm/Transforms/Obfuscation/Utils.h"
+#include "BogusControlFlow.h"
+#include "utils/Utils.h"
 
 // Stats
 #define DEBUG_TYPE "BogusControlFlow"

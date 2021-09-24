@@ -1,4 +1,4 @@
-//===- FlatteningIncludes.h - Flattening Obfuscation pass------------------===//
+//===- SubstitutionIncludes.h - Substitution Obfuscation pass-------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,29 +7,32 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file contains includes and defines for the split basicblock pass
+// This file contains includes and defines for the substitution pass
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef _SPLIT_INCLUDES_
-#define _SPLIT_INCLUDES_
+#ifndef _SUBSTITUTIONS_H_
+#define _SUBSTITUTIONS_H_
 
 
 // LLVM include
 #include "llvm/Pass.h"
-#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/ADT/Statistic.h"
-#include "llvm/Transforms/Utils/Local.h" // For DemoteRegToStack and DemotePHIToStack
 #include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/Scalar.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/Transforms/Obfuscation/Utils.h"
-#include "llvm/CryptoUtils.h"
+#include "utils/CryptoUtils.h"
 
 // Namespace
+using namespace llvm;
+using namespace std;
+
 namespace llvm {
-	Pass *createSplitBasicBlock(bool flag);
+	Pass *createSubstitution ();
+	Pass *createSubstitution (bool flag);
 }
+
 #endif
 

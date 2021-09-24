@@ -24,7 +24,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/ADT/Statistic.h"
-#include "llvm/CryptoUtils.h"
+#include "CryptoUtils.h"
 
 #include <fstream>
 #include <string>
