@@ -11,6 +11,8 @@
 #include "substitution/Substitution.h"
 #include "utils/CryptoUtils.h"
 
+#include "string/StringObfuscation.h"
+
 static const char PassesDelimiter = ',';
 static const std::string EnvVarPrefix = "LLVM_OBF_";
 
@@ -38,7 +40,13 @@ bool addPassWithName(FunctionPassManager &FPM, StringRef &passName) {
 }
 
 bool addPassWithName(ModulePassManager &MPM, StringRef &passName) {
-  return false;
+  if (passName == "string-encryption") {
+    MPM.addPass(StringObfuscatorPass());
+  } else {
+    return false;
+  }
+
+  return true;
 }
 
 template <class T>
