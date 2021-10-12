@@ -252,6 +252,26 @@ void BogusControlFlow::addBogusFlow(BasicBlock *basicBlock, Function &F) {
   BasicBlock::iterator i1 = basicBlock->begin();
   if (basicBlock->getFirstNonPHIOrDbgOrLifetime())
     i1 = (BasicBlock::iterator)basicBlock->getFirstNonPHIOrDbgOrLifetime();
+
+  /* TODO: find a real fix or try with the probe-stack inline-asm when its
+   * ready. See https://github.com/Rust-for-Linux/linux/issues/355. Sometimes
+   * moving an alloca from the entry block to the second block causes a segfault
+   * when using the "probe-stack" attribute (observed with with Rust programs).
+   * To avoid this issue we just split the entry block after the allocas in this
+   * case.
+   */
+  if (F.hasFnAttribute("probe-stack") && basicBlock->isEntryBlock()) {
+    // Find the first non alloca instruction
+    while ((i1 != basicBlock->end()) && isa<AllocaInst>(i1)) {
+      i1++;
+    }
+
+    // If there are no other kind of instruction we just don't split that entry
+    // block
+    if (i1 == basicBlock->end())
+      return;
+  }
+
   Twine *var;
   var = new Twine("originalBB");
   BasicBlock *originalBB = basicBlock->splitBasicBlock(i1, *var);
