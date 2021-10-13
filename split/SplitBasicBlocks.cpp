@@ -67,6 +67,7 @@ bool SplitBasicBlock::runSplitBasicBlock(Function &F) {
   if (toObfuscate(flag, tmp, "split")) {
     split(tmp);
     ++Split;
+    return true;
   }
 
   return false;
