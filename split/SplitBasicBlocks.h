@@ -42,7 +42,7 @@ struct SplitBasicBlock {
 
 struct SplitBasicBlockPass : public PassInfoMixin<SplitBasicBlockPass>,
                              public SplitBasicBlock {
-  SplitBasicBlockPass() {}
+  SplitBasicBlockPass();
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm

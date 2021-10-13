@@ -71,6 +71,7 @@ bool SplitBasicBlock::runSplitBasicBlock(Function &F) {
 
   return false;
 }
+SplitBasicBlockPass::SplitBasicBlockPass() { this->flag = true; }
 
 void SplitBasicBlock::split(Function *f) {
   std::vector<BasicBlock *> origBB;
