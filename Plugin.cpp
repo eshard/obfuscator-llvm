@@ -7,6 +7,7 @@
 #include "split/SplitBasicBlocks.h"
 #include "substitution/Substitution.h"
 
+namespace llvm {
 extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "Obfuscator plugin", "v0.1",
           [](PassBuilder &PB) {
@@ -31,3 +32,4 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
                 });
           }};
 }
+} // namespace llvm

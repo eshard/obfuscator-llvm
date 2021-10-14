@@ -33,7 +33,7 @@ STATISTIC(Flattened, "Functions flattened");
 namespace llvm {
 
 bool Flattening::flatten(Function *f) {
-  vector<BasicBlock *> origBB;
+  std::vector<BasicBlock *> origBB;
   BasicBlock *loopEntry;
   BasicBlock *loopEnd;
   LoadInst *load;
@@ -121,8 +121,8 @@ bool Flattening::flatten(Function *f) {
 
   BranchInst::Create(loopEntry, &*f->begin());
   // Put all BB in the switch
-  for (vector<BasicBlock *>::iterator b = origBB.begin(); b != origBB.end();
-       ++b) {
+  for (std::vector<BasicBlock *>::iterator b = origBB.begin();
+       b != origBB.end(); ++b) {
     BasicBlock *i = *b;
     ConstantInt *numCase = NULL;
 
@@ -136,8 +136,8 @@ bool Flattening::flatten(Function *f) {
     switchI->addCase(numCase, i);
   }
   // Recalculate switchVar
-  for (vector<BasicBlock *>::iterator b = origBB.begin(); b != origBB.end();
-       ++b) {
+  for (std::vector<BasicBlock *>::iterator b = origBB.begin();
+       b != origBB.end(); ++b) {
     BasicBlock *i = *b;
     ConstantInt *numCase = NULL;
 

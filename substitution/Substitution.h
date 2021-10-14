@@ -31,10 +31,6 @@
 #define NUMBER_OR_SUBST 2
 #define NUMBER_XOR_SUBST 2
 
-// Namespace
-using namespace llvm;
-using namespace std;
-
 namespace llvm {
 struct Substitution {
   Substitution();

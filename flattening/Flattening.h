@@ -24,9 +24,6 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils/Local.h" // For DemoteRegToStack and DemotePHIToStack
 
-// Namespace
-using namespace std;
-
 namespace llvm {
 struct Flattening {
   bool flag;

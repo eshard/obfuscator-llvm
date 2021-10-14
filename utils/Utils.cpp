@@ -3,6 +3,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include <sstream>
 
+namespace llvm {
+
 // Shamefully borrowed from ../Scalar/RegToMem.cpp :(
 bool valueEscapes(Instruction *Inst) {
   BasicBlock *BB = Inst->getParent();
@@ -145,3 +147,5 @@ bool toObfuscate(bool flag, Function *f, std::string attribute) {
 
   return false;
 }
+
+} // namespace llvm

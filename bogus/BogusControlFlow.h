@@ -36,11 +36,7 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 #include <list>
 
-using namespace std;
-
-// Namespace
 namespace llvm {
-
 struct BogusControlFlow {
   BogusControlFlow();
   BogusControlFlow(bool flag);
