@@ -14,6 +14,12 @@ target_include_directories(LLVMObfuscator PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+option(BUILD_DUMMY "Build dummy plugin" OFF)
+if(BUILD_DUMMY)
+  add_library(LLVMDummy SHARED Dummy.cpp)
+  target_include_directories(LLVMDummy PRIVATE ${LLVM_INCLUDE_DIRS})
+endif(BUILD_DUMMY)
+
 add_subdirectory(utils)
 
 add_subdirectory(bogus)
