@@ -219,6 +219,7 @@ bool Flattening::runFlattening(Function &F) {
   if (toObfuscate(true, tmp, "fla")) {
     if (flatten(tmp)) {
       ++Flattened;
+      return true;
     }
   }
 
@@ -241,8 +242,8 @@ FlatteningObfuscatorPass::FlatteningObfuscatorPass() {}
 
 PreservedAnalyses FlatteningObfuscatorPass::run(Function &F,
                                                 FunctionAnalysisManager &) {
-  return runFlattening(F) ? PreservedAnalyses::all()
-                          : PreservedAnalyses::none();
+  return runFlattening(F) ? PreservedAnalyses::none()
+                          : PreservedAnalyses::all();
 }
 
 char LegacyFlattening::ID = 0;
