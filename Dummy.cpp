@@ -99,6 +99,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
               MPM.addPass(DummyModulePass("PipelineStartEPCallback"));
             });
 
+#if LLVM_VERSION_MAJOR >= 13
         // Add optimization right after passes that do basic simplification of
         // the input IR.
         PB.registerPipelineEarlySimplificationEPCallback(
@@ -108,6 +109,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
               MPM.addPass(
                   DummyModulePass("PipelineEarlySimplificationEPCallback"));
             });
+#endif
 
 #if LLVM_VERSION_MAJOR >= 11
         // Add optimizations at the very end of the function optimization
