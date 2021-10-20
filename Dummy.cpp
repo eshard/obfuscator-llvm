@@ -109,6 +109,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
                   DummyModulePass("PipelineEarlySimplificationEPCallback"));
             });
 
+#if LLVM_VERSION_MAJOR >= 11
         // Add optimizations at the very end of the function optimization
         // pipeline.
         PB.registerOptimizerLastEPCallback(
@@ -116,6 +117,18 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
               outs() << "dummy: registerOptimizerLastEPCallback callback\n";
               MPM.addPass(DummyModulePass("OptimizerLastEPCallback"));
             });
+#else
+        // Add optimizations at the very end of the function optimization
+        // pipeline. A key difference between this and the legacy PassManager's
+        // OptimizerLast callback is that this extension point is not triggered
+        // at O0. Extensions to the O0 pipeline should append their passes to
+        // the end of the overall pipeline.
+        PB.registerOptimizerLastEPCallback(
+            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerOptimizerLastEPCallback callback\n";
+              FPM.addPass(DummyFunctionPass("OptimizerLastEPCallback"));
+            });
+#endif
 
         PB.registerPipelineParsingCallback(
             [](StringRef Name, FunctionPassManager &FPM,
