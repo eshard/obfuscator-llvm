@@ -19,13 +19,13 @@ struct DummyFunctionPass : public PassInfoMixin<DummyFunctionPass>,
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
-struct DummyModulePass : public PassInfoMixin<DummyModulePass>,
-                         public Dummy {
+struct DummyModulePass : public PassInfoMixin<DummyModulePass>, public Dummy {
   DummyModulePass(const std::string c) : Dummy(c) {}
   PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
-PreservedAnalyses DummyFunctionPass::run(Function &F, FunctionAnalysisManager &AM) {
+PreservedAnalyses DummyFunctionPass::run(Function &F,
+                                         FunctionAnalysisManager &AM) {
   return runDummyFunction(F) ? PreservedAnalyses::none()
                              : PreservedAnalyses::all();
 }
@@ -36,90 +36,100 @@ PreservedAnalyses DummyModulePass::run(Module &M, ModuleAnalysisManager &AM) {
 }
 
 bool Dummy::runDummyFunction(Function &F) {
-  outs() << " - " << "caller=" << caller_ << "\n";
+  outs() << " - "
+         << "caller=" << caller_ << "\n";
   return false;
 }
 
 bool Dummy::runDummyModule(Module &M) {
-  outs() << " - " << "caller=" << caller_ << "\n";
+  outs() << " - "
+         << "caller=" << caller_ << "\n";
   return false;
 }
 
 extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "Dummy plugin", "v1.0",
-          [](PassBuilder &PB) {
-            // Add passes that perform peephole optimizations similar to the instruction combiner. These
-            // passes will be inserted after each instance of the instruction combiner pass.
-            PB.registerPeepholeEPCallback(
-                [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerPeepholeEPCallback callback\n";
-                FPM.addPass(DummyFunctionPass("PeepholeEPCallback"));
-                });
+  return {
+      LLVM_PLUGIN_API_VERSION, "Dummy plugin", "v1.0", [](PassBuilder &PB) {
+        // Add passes that perform peephole optimizations similar to the
+        // instruction combiner. These passes will be inserted after each
+        // instance of the instruction combiner pass.
+        PB.registerPeepholeEPCallback(
+            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerPeepholeEPCallback callback\n";
+              FPM.addPass(DummyFunctionPass("PeepholeEPCallback"));
+            });
 
-            // Add loop passes to the end of the loop optimizer.
-            PB.registerLateLoopOptimizationsEPCallback(
-                [](LoopPassManager &LPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerLateLoopOptimizationsEPCallback callback\n";
-                });
+        // Add loop passes to the end of the loop optimizer.
+        PB.registerLateLoopOptimizationsEPCallback([](LoopPassManager &LPM,
+                                                      PassBuilder::
+                                                          OptimizationLevel O) {
+          outs() << "dummy: registerLateLoopOptimizationsEPCallback callback\n";
+        });
 
-            // Add optimization passes after most of the main optimizations, but before the last cleanup-ish
-            // optimizations.
-            PB.registerScalarOptimizerLateEPCallback(
-                [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerScalarOptimizerLateEPCallback callback\n";
-                FPM.addPass(DummyFunctionPass("ScalarOptimizerLateEPCallback"));
-                });
+        // Add optimization passes after most of the main optimizations, but
+        // before the last cleanup-ish optimizations.
+        PB.registerScalarOptimizerLateEPCallback(
+            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+              outs()
+                  << "dummy: registerScalarOptimizerLateEPCallback callback\n";
+              FPM.addPass(DummyFunctionPass("ScalarOptimizerLateEPCallback"));
+            });
 
-            // Add CallGraphSCC passes at the end of the main CallGraphSCC passes and before any function
-            // simplification passes run by CGPassManager
-            PB.registerCGSCCOptimizerLateEPCallback(
-                [](CGSCCPassManager &CGPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerCGSCCOptimizerLateEPCallback callback\n";
-                });
+        // Add CallGraphSCC passes at the end of the main CallGraphSCC passes
+        // and before any function simplification passes run by CGPassManager
+        PB.registerCGSCCOptimizerLateEPCallback(
+            [](CGSCCPassManager &CGPM, PassBuilder::OptimizationLevel O) {
+              outs()
+                  << "dummy: registerCGSCCOptimizerLateEPCallback callback\n";
+            });
 
-            // Add optimization passes before the vectorizer and other highly target specific optimization
-            // passes are executed.
-            PB.registerVectorizerStartEPCallback(
-                [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerVectorizerStartEPCallback callback\n";
-                FPM.addPass(DummyFunctionPass("VectorizerStartEPCallback"));
-                });
+        // Add optimization passes before the vectorizer and other highly target
+        // specific optimization passes are executed.
+        PB.registerVectorizerStartEPCallback(
+            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerVectorizerStartEPCallback callback\n";
+              FPM.addPass(DummyFunctionPass("VectorizerStartEPCallback"));
+            });
 
-            // Add optimization once at the start of the pipeline. This does not apply to 'backend' compiles
-            // (LTO and ThinLTO link-time pipelines).
-            PB.registerPipelineStartEPCallback(
-                [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerPipelineStartEPCallback callback\n";
-                MPM.addPass(DummyModulePass("PipelineStartEPCallback"));
-                });
+        // Add optimization once at the start of the pipeline. This does not
+        // apply to 'backend' compiles (LTO and ThinLTO link-time pipelines).
+        PB.registerPipelineStartEPCallback(
+            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerPipelineStartEPCallback callback\n";
+              MPM.addPass(DummyModulePass("PipelineStartEPCallback"));
+            });
 
-            // Add optimization right after passes that do basic simplification of the input IR.
-            PB.registerPipelineEarlySimplificationEPCallback(
-                [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerPipelineEarlySimplificationEPCallback callback\n";
-                MPM.addPass(DummyModulePass("PipelineEarlySimplificationEPCallback"));
-                });
+        // Add optimization right after passes that do basic simplification of
+        // the input IR.
+        PB.registerPipelineEarlySimplificationEPCallback(
+            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerPipelineEarlySimplificationEPCallback "
+                        "callback\n";
+              MPM.addPass(
+                  DummyModulePass("PipelineEarlySimplificationEPCallback"));
+            });
 
-            // Add optimizations at the very end of the function optimization pipeline.
-            PB.registerOptimizerLastEPCallback(
-                [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-                outs() << "dummy: registerOptimizerLastEPCallback callback\n";
-                MPM.addPass(DummyModulePass("OptimizerLastEPCallback"));
-                });
+        // Add optimizations at the very end of the function optimization
+        // pipeline.
+        PB.registerOptimizerLastEPCallback(
+            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
+              outs() << "dummy: registerOptimizerLastEPCallback callback\n";
+              MPM.addPass(DummyModulePass("OptimizerLastEPCallback"));
+            });
 
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                FPM.addPass(DummyFunctionPass("PipelineParsingCallback"));
-                return true;
-                });
+        PB.registerPipelineParsingCallback(
+            [](StringRef Name, FunctionPassManager &FPM,
+               ArrayRef<PassBuilder::PipelineElement>) {
+              FPM.addPass(DummyFunctionPass("PipelineParsingCallback"));
+              return true;
+            });
 
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, ModulePassManager &MPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                MPM.addPass(DummyModulePass("PipelineParsingCallback"));
-                return true;
-                });
-          }};
+        PB.registerPipelineParsingCallback(
+            [](StringRef Name, ModulePassManager &MPM,
+               ArrayRef<PassBuilder::PipelineElement>) {
+              MPM.addPass(DummyModulePass("PipelineParsingCallback"));
+              return true;
+            });
+      }};
 }
-}
+} // namespace llvm
