@@ -93,11 +93,15 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
 
         // Add optimization once at the start of the pipeline. This does not
         // apply to 'backend' compiles (LTO and ThinLTO link-time pipelines).
-        PB.registerPipelineStartEPCallback(
-            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-              outs() << "dummy: registerPipelineStartEPCallback callback\n";
-              MPM.addPass(DummyModulePass("PipelineStartEPCallback"));
-            });
+        PB.registerPipelineStartEPCallback([](ModulePassManager &MPM
+#if LLVM_VERSION_MAJOR >= 12
+                                              ,
+                                              PassBuilder::OptimizationLevel O
+#endif
+                                           ) {
+          outs() << "dummy: registerPipelineStartEPCallback callback\n";
+          MPM.addPass(DummyModulePass("PipelineStartEPCallback"));
+        });
 
 #if LLVM_VERSION_MAJOR >= 13
         // Add optimization right after passes that do basic simplification of
