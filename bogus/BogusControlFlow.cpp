@@ -260,7 +260,13 @@ void BogusControlFlow::addBogusFlow(BasicBlock *basicBlock, Function &F) {
    * To avoid this issue we just split the entry block after the allocas in this
    * case.
    */
-  if (F.hasFnAttribute("probe-stack") && basicBlock->isEntryBlock()) {
+  if (F.hasFnAttribute("probe-stack") &&
+#if LLVM_VERSION_MAJOR < 13
+      (basicBlock == &basicBlock->getParent()->getEntryBlock())
+#else
+      basicBlock->isEntryBlock()
+#endif
+  ) {
     // Find the first non alloca instruction
     while ((i1 != basicBlock->end()) && isa<AllocaInst>(i1)) {
       i1++;
