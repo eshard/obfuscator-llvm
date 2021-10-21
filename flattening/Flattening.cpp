@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "Flattening.h"
-#include "utils/CryptoUtils.h"
 #include "utils/Utils.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/LazyValueInfo.h"
@@ -22,6 +21,8 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/LowerSwitch.h"
+
+#include "utils/CryptoUtils.h"
 
 #define DEBUG_TYPE "flattening"
 

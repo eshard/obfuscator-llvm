@@ -96,6 +96,7 @@
 
 #include "BogusControlFlow.h"
 #include "utils/Utils.h"
+#include "utils/CryptoUtils.h"
 
 namespace llvm {
 

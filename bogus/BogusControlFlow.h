@@ -15,7 +15,6 @@
 #define _BOGUSCONTROLFLOW_H_
 
 // LLVM include
-#include "utils/CryptoUtils.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/CodeGen/ISDOpcodes.h"
 #include "llvm/IR/BasicBlock.h"

@@ -15,7 +15,6 @@
 #define _SPLIT_INCLUDES_
 
 // LLVM include
-#include "utils/CryptoUtils.h"
 #include "utils/Utils.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/BasicBlock.h"

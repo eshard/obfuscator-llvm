@@ -16,7 +16,10 @@
 #include "utils/Utils.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
+
+#include "utils/CryptoUtils.h"
 
 namespace llvm {
 

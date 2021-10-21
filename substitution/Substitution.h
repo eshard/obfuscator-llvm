@@ -15,14 +15,12 @@
 #define _SUBSTITUTIONS_H_
 
 // LLVM include
-#include "utils/CryptoUtils.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
-#include "llvm/Support/CommandLine.h"
 #include "llvm/Transforms/IPO.h"
 
 #define NUMBER_ADD_SUBST 4

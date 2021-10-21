@@ -12,11 +12,12 @@
 //===----------------------------------------------------------------------===//
 
 #include "SplitBasicBlocks.h"
-#include "utils/CryptoUtils.h"
 #include "utils/Utils.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
+
+#include "utils/CryptoUtils.h"
 
 #define DEBUG_TYPE "split"
 
