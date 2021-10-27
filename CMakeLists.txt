@@ -12,8 +12,6 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 link_directories(${LLVM_LIBRARY_DIRS})
 
-add_definitions("-D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS")
-
 # Depends on how clang was compiled, by default it's set to C++14
 # https://llvm.org/docs/CMake.html#rarely-used-cmake-variables
 set(CMAKE_CXX_STANDARD 14)
