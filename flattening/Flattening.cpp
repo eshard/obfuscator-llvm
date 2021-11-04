@@ -71,8 +71,7 @@ bool Flattening::flatten(Function *f) {
     br = cast<BranchInst>(insert->getTerminator());
   }
 
-  if ((br != NULL && br->isConditional()) ||
-      insert->getTerminator()->getNumSuccessors() > 1) {
+  if (br != NULL) {
     BasicBlock::iterator i = insert->end();
     --i;
 
