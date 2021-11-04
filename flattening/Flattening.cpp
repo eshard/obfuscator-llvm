@@ -43,6 +43,12 @@ bool Flattening::flatten(Function *f) {
   char scrambling_key[16];
   llvm::cryptoutils->get_bytes(scrambling_key, 16);
   // END OF SCRAMBLER
+
+#if LLVM_VERSION_MAJOR < 9
+  FunctionPass *lower = createLowerSwitchPass();
+  lower->runOnFunction(*f);
+#endif
+
   // Save all original BB
   for (Function::iterator i = f->begin(); i != f->end(); ++i) {
     BasicBlock *tmp = &*i;
@@ -240,9 +246,16 @@ bool LegacyFlattening::runOnFunction(Function &F) { return runFlattening(F); }
 FlatteningObfuscatorPass::FlatteningObfuscatorPass() {}
 
 PreservedAnalyses FlatteningObfuscatorPass::run(Function &F,
-                                                FunctionAnalysisManager &) {
-  return runFlattening(F) ? PreservedAnalyses::none()
-                          : PreservedAnalyses::all();
+                                                FunctionAnalysisManager &AM) {
+
+  PreservedAnalyses lowerPA = LowerSwitchPass().run(F, AM);
+
+  PreservedAnalyses flattenPA =
+      runFlattening(F) ? PreservedAnalyses::none() : PreservedAnalyses::all();
+
+  lowerPA.intersect(flattenPA);
+
+  return flattenPA;
 }
 
 char LegacyFlattening::ID = 0;
