@@ -4,21 +4,23 @@ LLVM obfuscation is a LLVM pass plugin, used to apply transformation on [LLVM as
 
 ## Compilation
 
-To build this llvm plugin you need an llvm already built and define the path to llvm headers with
-`LLVM_INCLUDE_DIRS`.
+To build this plugin you need an llvm already built and installed version of llvm.
+Please refer to [llvm documentation](https://llvm.org/docs/CMake.html) to build and install llvm to the prefix of your choice.
 
-Example if llvm is installed at `/opt/llvm` set `-D LLVM_INCLUDE_DIRS="/opt/llvm/include/"`
+For example if you installed llvm at `/opt/llvm` with `-D CMAKE_INSTALL_PREFIX=/opt/llvm`.
 
-Then
+Then, to compile the plugin
 
 ```
 git clone https://github.com/eshard/llvm-obfuscation.git
 cd llvm-obfuscation
 
-cmake -D LLVM_INCLUDE_DIRS="/opt/llvm/include/"
-
-cmake --build .
+export LLVM_DIR=/opt/llvm/lib/cmake
+cmake -S . -B /tmp/llvm-obfuscation
+cmake --build /tmp/llvm-obfuscation
 ```
+
+If the compilation is successful the plugin is `libLLVMObfuscator.so` and can be used with **clang** (`-fpass-plugin=`) or **opt** (`-load-pass-plugin`).
 
 ## Usage
 
