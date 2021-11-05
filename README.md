@@ -12,12 +12,13 @@ For example if you installed llvm at `/opt/llvm` with `-D CMAKE_INSTALL_PREFIX=/
 Then, to compile the plugin
 
 ```
+cd ~
 git clone https://github.com/eshard/llvm-obfuscation.git
 cd llvm-obfuscation
 
 export LLVM_DIR=/opt/llvm/lib/cmake
-cmake -S . -B /tmp/llvm-obfuscation
-cmake --build /tmp/llvm-obfuscation
+cmake -S ~/llvm-obfuscation -B ~/tmp/llvm-obfuscation
+cmake --build ~/tmp/llvm-obfuscation
 ```
 
 If the compilation is successful the plugin is `libLLVMObfuscator.so` and can be used with **clang** (`-fpass-plugin=`) or **opt** (`-load-pass-plugin`).
@@ -50,6 +51,10 @@ llc --relocation-model=pic -filetype=obj hello_world_obfuscated.bc -o hello_worl
 # generate the binary file with clang
 clang hello_world_obfuscated.o -o hello_world_obfuscated
 ```
+
+## Cross compilation
+
+ - [With Android NDK](docs/ANDROID_NDK.md)
 
 # Acknowledgement
 
