@@ -32,6 +32,19 @@ you may need to specify `-fno-legacy-pass-manager`.
 
 `clang -fno-legacy-pass-manager -fpass-plugin=<path/to/llvm/obfuscation>/libLLVMObfuscator.so hello_world.c -o hello_world`
 
+You can chose to insert passes in the optimization pipeline by setting the following environment variables before running clang:
+- LLVM_OBF_PEEPHOLE_PASSES
+- LLVM_OBF_SCALAROPTIMIZERLATE_PASSES
+- LLVM_OBF_VECTORIZERSTART_PASSES
+- LLVM_OBF_PIPELINESTART_PASSES
+- LLVM_OBF_PIPELINEEARLYSIMPLIFICATION_PASSES
+- LLVM_OBF_OPTIMIZERLASTEP_PASSES
+
+For instance if you want to run the flattening, bogus and substitution passes in that order, you can do:
+`export LLVM_OBF_PIPELINEEARLYSIMPLIFICATION_PASSES="flattening, bogus, substitution"`
+
+Refer to the llvm::PassBuilder documentation for more information on each insertion point.
+
 ### With opt
 
 [`opt`](https://llvm.org/docs/CommandGuide/opt.html) can be used to apply specific passes from LLRM-IR you
@@ -51,6 +64,16 @@ llc --relocation-model=pic -filetype=obj hello_world_obfuscated.bc -o hello_worl
 # generate the binary file with clang
 clang hello_world_obfuscated.o -o hello_world_obfuscated
 ```
+
+### Debugging
+
+To allow debugging passes in a deterministic way, the environment variable `LLVM_OBF_SEED` can be set to fix the CryptoUtils seed (used to for all random number generation and
+encryption).
+
+The variable should contain a hex string of 32 characters or 34 characters if prefixed with "0x", for example:
+`export LLVM_OBF_SEED="0xA04252B187478C00A40BC6D81D1A8A52"`
+
+The environement variable `LLVM_OBF_DEBUG_SEED` can be set to "y" to enable printing the seed everytime the plugin is loaded.
 
 ## Cross compilation
 
