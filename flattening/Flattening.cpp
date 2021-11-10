@@ -249,14 +249,14 @@ FlatteningObfuscatorPass::FlatteningObfuscatorPass() {}
 PreservedAnalyses FlatteningObfuscatorPass::run(Function &F,
                                                 FunctionAnalysisManager &AM) {
 
-  PreservedAnalyses lowerPA = LowerSwitchPass().run(F, AM);
+  PreservedAnalyses analysis = PreservedAnalyses::all();
 
-  PreservedAnalyses flattenPA =
-      runFlattening(F) ? PreservedAnalyses::none() : PreservedAnalyses::all();
+  analysis.intersect(LowerSwitchPass().run(F, AM));
 
-  lowerPA.intersect(flattenPA);
+  analysis.intersect(runFlattening(F) ? PreservedAnalyses::none()
+                                      : PreservedAnalyses::all());
 
-  return flattenPA;
+  return analysis;
 }
 
 char LegacyFlattening::ID = 0;
