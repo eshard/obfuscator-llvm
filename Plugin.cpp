@@ -1,13 +1,14 @@
+#include "llvm/ADT/SmallVector.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
+#include "llvm/Support/FormatVariadic.h"
+
 #include "bogus/BogusControlFlow.h"
 #include "flattening/Flattening.h"
 #include "split/SplitBasicBlocks.h"
 #include "substitution/Substitution.h"
 #include "utils/CryptoUtils.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/FormatVariadic.h"
 
 #define PASSES_DELIM ','
 #define ENV_VAR_PREFIX "LLVM_OBF_"
