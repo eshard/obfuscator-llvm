@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(llvm-obfuscator)
 
-find_package(LLVM PATHS "${LLVM_DIR}" REQUIRED CONFIG)
+find_package(LLVM PATHS "${LLVM_DIR}" REQUIRED CONFIG NO_DEFAULT_PATH)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
