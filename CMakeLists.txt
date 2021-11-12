@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.13.5)
 
 project(llvm-obfuscator)
 
@@ -11,6 +11,13 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 link_directories(${LLVM_LIBRARY_DIRS})
+
+message(STATUS "LLVM includes: ${LLVM_INCLUDE_DIRS}")
+message(STATUS "LLVM definitions: ${LLVM_DEFINITIONS_LIST}")
+message(STATUS "LLVM libraries: ${LLVM_LIBRARY_DIRS}")
+
+message(STATUS "LLVM Config: ASSERTIONS:${LLVM_ENABLE_ASSERTIONS}, "
+               "EH:${LLVM_ENABLE_EH}, RTTI:${LLVM_ENABLE_RTTI}")
 
 # Depends on how clang was compiled, by default it's set to C++14
 # https://llvm.org/docs/CMake.html#rarely-used-cmake-variables
