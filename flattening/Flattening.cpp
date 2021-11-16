@@ -53,6 +53,9 @@ bool Flattening::flatten(Function *f) {
   // Save all original BB
   for (Function::iterator i = f->begin(); i != f->end(); ++i) {
     BasicBlock *tmp = &*i;
+    if (tmp->isEHPad() || tmp->isLandingPad()) {
+      return false;
+    }
     origBB.push_back(tmp);
 
     BasicBlock *bb = &*i;
