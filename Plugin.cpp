@@ -10,8 +10,8 @@
 #include "substitution/Substitution.h"
 #include "utils/CryptoUtils.h"
 
-#define PASSES_DELIM ','
-#define ENV_VAR_PREFIX "LLVM_OBF_"
+static const char PassesDelimiter = ',';
+static const std::string EnvVarPrefix = "LLVM_OBF_";
 
 namespace llvm {
 
@@ -45,7 +45,7 @@ void addPassesFromEnvVar(PassManager<T> &M, const StringRef &var) {
   auto passesStr = getEnvVar(var);
 
   SmallVector<StringRef> passes;
-  passesStr.split(passes, PASSES_DELIM, -1, false);
+  passesStr.split(passes, PassesDelimiter, -1, false);
   for (auto passName : passes) {
     addPassWithName(M, passName);
   }
@@ -53,13 +53,13 @@ void addPassesFromEnvVar(PassManager<T> &M, const StringRef &var) {
 
 extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
   /* Fixed seed for cryptoutils */
-  StringRef seed = getEnvVar(ENV_VAR_PREFIX "SEED");
+  StringRef seed = getEnvVar(EnvVarPrefix + "SEED");
   if (!seed.empty()) {
     llvm::cryptoutils->prng_seed(seed.data());
   }
 
   /* Print the seed */
-  if (getEnvVar(ENV_VAR_PREFIX "DEBUG_SEED") == "y") {
+  if (getEnvVar(EnvVarPrefix + "DEBUG_SEED") == "y") {
     llvm::cryptoutils->get_uint8_t();
     const char *used_seed = llvm::cryptoutils->get_seed();
     outs() << "SEED = 0x";
@@ -90,7 +90,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // instance of the instruction combiner pass.
         PB.registerPeepholeEPCallback(
             [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-              addPassesFromEnvVar(FPM, ENV_VAR_PREFIX "PEEPHOLE_PASSES");
+              addPassesFromEnvVar(FPM, EnvVarPrefix + "PEEPHOLE_PASSES");
             });
 
         // Add optimization passes after most of the main optimizations, but
@@ -98,25 +98,25 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         PB.registerScalarOptimizerLateEPCallback(
             [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
               addPassesFromEnvVar(FPM,
-                                  ENV_VAR_PREFIX "SCALAROPTIMIZERLATE_PASSES");
+                                  EnvVarPrefix + "SCALAROPTIMIZERLATE_PASSES");
             });
 
         // Add optimization passes before the vectorizer and other highly target
         // specific optimization passes are executed.
         PB.registerVectorizerStartEPCallback(
             [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-              addPassesFromEnvVar(FPM, ENV_VAR_PREFIX "VECTORIZERSTART_PASSES");
+              addPassesFromEnvVar(FPM, EnvVarPrefix + "VECTORIZERSTART_PASSES");
             });
 
         // Add optimization once at the start of the pipeline. This does not
         // apply to 'backend' compiles (LTO and ThinLTO link-time pipelines).
-        PB.registerPipelineStartEPCallback([](ModulePassManager &MPM
+        PB.registerPipelineStartEPCallback([&](ModulePassManager &MPM
 #if LLVM_VERSION_MAJOR >= 12
-                                              ,
-                                              PassBuilder::OptimizationLevel O
+                                               ,
+                                               PassBuilder::OptimizationLevel O
 #endif
                                            ) {
-          addPassesFromEnvVar(MPM, ENV_VAR_PREFIX "PIPELINESTART_PASSES");
+          addPassesFromEnvVar(MPM, EnvVarPrefix + "PIPELINESTART_PASSES");
         });
 
 #if LLVM_VERSION_MAJOR >= 13
@@ -124,8 +124,8 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // the input IR.
         PB.registerPipelineEarlySimplificationEPCallback(
             [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-              addPassesFromEnvVar(MPM, ENV_VAR_PREFIX
-                                  "PIPELINEEARLYSIMPLIFICATION_PASSES");
+              addPassesFromEnvVar(
+                  MPM, EnvVarPrefix + "PIPELINEEARLYSIMPLIFICATION_PASSES");
             });
 #endif
 
@@ -134,7 +134,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // pipeline.
         PB.registerOptimizerLastEPCallback(
             [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
-              addPassesFromEnvVar(MPM, ENV_VAR_PREFIX "OPTIMIZERLASTEP_PASSES");
+              addPassesFromEnvVar(MPM, EnvVarPrefix + "OPTIMIZERLASTEP_PASSES");
             });
 #else
         // Add optimizations at the very end of the function optimization
@@ -144,7 +144,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // the end of the overall pipeline.
         PB.registerOptimizerLastEPCallback(
             [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
-              addPassesFromEnvVar(FPM, ENV_VAR_PREFIX "OPTIMIZERLASTEP_PASSES");
+              addPassesFromEnvVar(FPM, EnvVarPrefix + "OPTIMIZERLASTEP_PASSES");
             });
 #endif
       }};
