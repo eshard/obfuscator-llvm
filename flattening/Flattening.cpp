@@ -254,7 +254,8 @@ PreservedAnalyses FlatteningObfuscatorPass::run(Function &F,
 
   PreservedAnalyses analysis = PreservedAnalyses::all();
 
-  analysis.intersect(LowerSwitchPass().run(F, AM));
+  // TODO: check if this is even necessary
+  //analysis.intersect(LowerSwitchPass().run(F, AM));
 
   analysis.intersect(runFlattening(F) ? PreservedAnalyses::none()
                                       : PreservedAnalyses::all());
