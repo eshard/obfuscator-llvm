@@ -123,6 +123,24 @@ void SplitBasicBlock::split(Function *f) {
       last = test[i];
       if (toSplit->size() < 2)
         continue;
+
+      /* TODO: find a real fix or try with the probe-stack inline-asm when its
+       * ready. See https://github.com/Rust-for-Linux/linux/issues/355.
+       * Sometimes moving an alloca from the entry block to the second block
+       * causes a segfault when using the "probe-stack" attribute (observed with
+       * with Rust programs). To avoid this issue we just split the entry block
+       * after the allocas in this case.
+       */
+      if (f->hasFnAttribute("probe-stack") &&
+#if LLVM_VERSION_MAJOR < 13
+          (curr == &curr->getParent()->getEntryBlock())
+#else
+          curr->isEntryBlock()
+#endif
+          && isa<AllocaInst>(it)) {
+        continue;
+      }
+
       toSplit = toSplit->splitBasicBlock(it, toSplit->getName() + ".split");
     }
 
