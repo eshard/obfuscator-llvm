@@ -8,7 +8,7 @@
 #include "substitution/Substitution.h"
 
 extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "SubstitutionObfuscatorPass", "v0.1",
+  return {LLVM_PLUGIN_API_VERSION, "Obfuscator plugin", "v0.1",
           [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback(
                 [](StringRef Name, FunctionPassManager &FPM,
