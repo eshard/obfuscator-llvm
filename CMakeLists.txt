@@ -12,6 +12,7 @@ add_library(LLVMObfuscator SHARED Plugin.cpp)
 
 target_include_directories(LLVMObfuscator PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(utils)
 
