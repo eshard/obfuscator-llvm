@@ -1,5 +1,6 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/Passes/OptimizationLevel.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/FormatVariadic.h"
@@ -89,14 +90,14 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // instruction combiner. These passes will be inserted after each
         // instance of the instruction combiner pass.
         PB.registerPeepholeEPCallback(
-            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+            [](FunctionPassManager &FPM, OptimizationLevel O) {
               addPassesFromEnvVar(FPM, EnvVarPrefix + "PEEPHOLE_PASSES");
             });
 
         // Add optimization passes after most of the main optimizations, but
         // before the last cleanup-ish optimizations.
         PB.registerScalarOptimizerLateEPCallback(
-            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+            [](FunctionPassManager &FPM, OptimizationLevel O) {
               addPassesFromEnvVar(FPM,
                                   EnvVarPrefix + "SCALAROPTIMIZERLATE_PASSES");
             });
@@ -104,7 +105,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // Add optimization passes before the vectorizer and other highly target
         // specific optimization passes are executed.
         PB.registerVectorizerStartEPCallback(
-            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+            [](FunctionPassManager &FPM, OptimizationLevel O) {
               addPassesFromEnvVar(FPM, EnvVarPrefix + "VECTORIZERSTART_PASSES");
             });
 
@@ -113,7 +114,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         PB.registerPipelineStartEPCallback([&](ModulePassManager &MPM
 #if LLVM_VERSION_MAJOR >= 12
                                                ,
-                                               PassBuilder::OptimizationLevel O
+                                               OptimizationLevel O
 #endif
                                            ) {
           addPassesFromEnvVar(MPM, EnvVarPrefix + "PIPELINESTART_PASSES");
@@ -123,7 +124,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // Add optimization right after passes that do basic simplification of
         // the input IR.
         PB.registerPipelineEarlySimplificationEPCallback(
-            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
+            [](ModulePassManager &MPM, OptimizationLevel O) {
               addPassesFromEnvVar(
                   MPM, EnvVarPrefix + "PIPELINEEARLYSIMPLIFICATION_PASSES");
             });
@@ -133,7 +134,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // Add optimizations at the very end of the function optimization
         // pipeline.
         PB.registerOptimizerLastEPCallback(
-            [](ModulePassManager &MPM, PassBuilder::OptimizationLevel O) {
+            [](ModulePassManager &MPM, OptimizationLevel O) {
               addPassesFromEnvVar(MPM, EnvVarPrefix + "OPTIMIZERLASTEP_PASSES");
             });
 #else
@@ -143,7 +144,7 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // at O0. Extensions to the O0 pipeline should append their passes to
         // the end of the overall pipeline.
         PB.registerOptimizerLastEPCallback(
-            [](FunctionPassManager &FPM, PassBuilder::OptimizationLevel O) {
+            [](FunctionPassManager &FPM, OptimizationLevel O) {
               addPassesFromEnvVar(FPM, EnvVarPrefix + "OPTIMIZERLASTEP_PASSES");
             });
 #endif
