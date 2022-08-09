@@ -4,21 +4,28 @@ LLVM obfuscation is a LLVM pass plugin, used to apply transformation on [LLVM as
 
 ## Compilation
 
-To build this plugin you need an llvm already built and installed version of llvm.
-Please refer to [llvm documentation](https://llvm.org/docs/CMake.html) to build and install llvm to the prefix of your choice.
+To build this plugin you need to build LLVM. Refer to the [documentation](https://llvm.org/docs/CMake.html) for more information. 
 
-For example if you installed llvm at `/opt/llvm` with `-D CMAKE_INSTALL_PREFIX=/opt/llvm`.
+Here's how you can download, build and install LLVM:
+```
+git clone --depth 1 --branch llvmorg-14.0.6 https://github.com/llvm/llvm-project.git
+cd llvm-project
 
-Then, to compile the plugin
+mkdir -p build && cd build
+cmake -G "Ninja" -DCMAKE_INSTALL_PREFIX=/opt/llvm ..
+ninja -j$(nproc)
+ninja install
+```
+
+Then, to compile the plugin:
 
 ```
-cd ~
-git clone https://github.com/eshard/llvm-obfuscation.git
-cd llvm-obfuscation
+git clone https://github.com/eshard/obfuscator-llvm.git
+cd obfuscator-llvm
 
-export LLVM_DIR=/opt/llvm/lib/cmake
-cmake -S ~/llvm-obfuscation -B ~/tmp/llvm-obfuscation
-cmake --build ~/tmp/llvm-obfuscation
+mkdir -p build && cd build
+cmake -G "Ninja" -DLLVM_DIR=/opt/llvm/lib/cmake ..
+ninja -j$(nproc)
 ```
 
 If the compilation is successful the plugin is `libLLVMObfuscator.so` and can be used with **clang** (`-fpass-plugin=`) or **opt** (`-load-pass-plugin`).
