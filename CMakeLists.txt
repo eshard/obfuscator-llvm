@@ -38,7 +38,7 @@ add_library(LLVMObfuscator SHARED Plugin.cpp)
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(LLVMObfuscator PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(LLVMObfuscator LLVMCore LLVMSupport)
+target_link_libraries(LLVMObfuscator LLVMCore LLVMSupport LLVMAnalysis LLVMTransformUtils)
 
 option(BUILD_DUMMY "Build dummy plugin" OFF)
 if(BUILD_DUMMY)
