@@ -14,6 +14,7 @@
 
 #include "Substitution.h"
 #include "utils/Utils.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/Support/CommandLine.h"
