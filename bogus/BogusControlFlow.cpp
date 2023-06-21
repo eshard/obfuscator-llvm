@@ -627,8 +627,8 @@ bool BogusControlFlow::doF(Module &M) {
   for (std::vector<Instruction *>::iterator i = toEdit.begin();
        i != toEdit.end(); ++i) {
     // if y < 10 || x*(x+1) % 2 == 0
-    opX = new LoadInst(x->getType()->getPointerElementType(), (Value *)x, "", (*i));
-    opY = new LoadInst(y->getType()->getPointerElementType(), (Value *)y, "", (*i));
+    opX = new LoadInst(x->getValueType(), (Value *)x, "", (*i));
+    opY = new LoadInst(y->getValueType(), (Value *)y, "", (*i));
 
     op = BinaryOperator::Create(
         Instruction::Sub, (Value *)opX,
