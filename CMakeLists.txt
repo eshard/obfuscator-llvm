@@ -21,7 +21,11 @@ message(STATUS "LLVM Config: ASSERTIONS:${LLVM_ENABLE_ASSERTIONS}, "
 
 # Depends on how clang was compiled, by default it's set to C++14
 # https://llvm.org/docs/CMake.html#rarely-used-cmake-variables
-set(CMAKE_CXX_STANDARD 14)
+if (LLVM_PACKAGE_VERSION VERSION_LESS "16.0.0")
+  set(CMAKE_CXX_STANDARD 14)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 
 if (LLVM_ENABLE_LIBCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
