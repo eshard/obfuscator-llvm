@@ -209,12 +209,15 @@ void StringObfuscatorPass::addDecodeAllStringsFunction(
     // at the field index
     if (str.isStruct) {
       array = builder.CreateStructGEP(
-          str.var->getType()->getPointerElementType(), str.var, str.index);
+          str.var->getValueType(), str.var, str.index);
     }
 
-    // Get a pointer to the first element of the array (start of the string)
+    // Get a pointer to the first element of the array (start of the string).
+    // Use the actual array type [size x i8] as the GEP element type, not the
+    // pointer type returned by getType() (which is opaque ptr in LLVM >= 15).
+    auto arrayType = ArrayType::get(Type::getInt8Ty(ctx), str.size);
     auto ptr = builder.CreateConstInBoundsGEP2_32(
-        array->getType()->getPointerElementType(), array, 0, 0);
+        arrayType, array, 0, 0);
 
     // Get the size of the string
     auto size = ConstantInt::get(IntegerType::getInt32Ty(ctx), str.size);
