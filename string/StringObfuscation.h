@@ -3,6 +3,7 @@
 
 // LLVM include
 #include "llvm/ADT/Statistic.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/Module.h"
