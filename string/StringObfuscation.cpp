@@ -214,7 +214,7 @@ void StringObfuscatorPass::addDecodeAllStringsFunction(
 
     // Get a pointer to the first element of the array (start of the string)
     auto ptr = builder.CreateConstInBoundsGEP2_32(
-        array->getType()->getPointerElementType(), array, 0, 0);
+        array->getType(), array, 0, 0);
 
     // Get the size of the string
     auto size = ConstantInt::get(IntegerType::getInt32Ty(ctx), str.size);
