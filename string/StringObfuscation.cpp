@@ -209,7 +209,7 @@ void StringObfuscatorPass::addDecodeAllStringsFunction(
     // at the field index
     if (str.isStruct) {
       array = builder.CreateStructGEP(
-          str.var->getType()->getPointerElementType(), str.var, str.index);
+          str.var->getValueType(), str.var, str.index);
     }
 
     // Get a pointer to the first element of the array (start of the string)
