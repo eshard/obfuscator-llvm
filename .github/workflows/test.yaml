@@ -1,5 +1,5 @@
 name: test-docker
-
+on: push
 jobs:
   build-with-llvm:
     runs-on: gcp-llvm-runner
