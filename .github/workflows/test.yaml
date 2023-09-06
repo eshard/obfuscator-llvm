@@ -1,0 +1,12 @@
+name: test-docker
+
+jobs:
+  build-with-llvm:
+    runs-on: gcp-llvm-runner
+    container:
+      image: clang-debian11:staging
+    steps:
+      - name: Check for dockerenv file
+        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+      - name: Check for files
+        run: (ls -alh / && ls -alh /home && ls -alh /opt)
