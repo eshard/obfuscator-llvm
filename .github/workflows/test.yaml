@@ -2,7 +2,7 @@ name: test-docker
 on: push
 jobs:
   build-with-llvm:
-    runs-on: gcp-llvm-runner
+    runs-on: self-hosted
     container:
       image: clang-debian11:staging
     steps:
