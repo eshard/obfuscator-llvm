@@ -4,7 +4,7 @@ jobs:
   build-with-llvm:
     runs-on: self-hosted
     container:
-      image: https://registry/clang-debian11:latest
+      image: registry:443/clang-debian11:latest
     steps:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
