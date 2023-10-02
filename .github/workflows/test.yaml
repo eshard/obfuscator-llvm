@@ -9,7 +9,18 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     steps:
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
-      - name: Check for files
-        run: (ls -alh / && ls -alh /home && ls -alh /opt)
+      - name: Checkout plugin sources
+        uses: actions/checkout@v3
+        with:
+          path: src/ollvm
+
+      - name: Compile plugin with LLVM 16
+        run: |
+          cmake \
+            -S src/llvm-16 \
+            -B build/llvm-16 \
+            -G Ninja \
+            -D CMAKE_VERBOSE_MAKEFILE=On \
+            -D LLVM_DIR=/usr/local/clang-install/lib/cmake \
+            -D BUILD_DUMMY=On
+          cmake --build build/llvm-16
