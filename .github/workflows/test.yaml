@@ -4,7 +4,7 @@ jobs:
   build-with-llvm:
     runs-on: self-hosted
     container:
-      image: registry:443/clang-debian11:staging
+      image: registry:443/clang-debian12:staging
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
