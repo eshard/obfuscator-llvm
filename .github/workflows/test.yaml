@@ -8,6 +8,8 @@ jobs:
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
+      volumes:
+        - '/__e:/__e'
     steps:
       - name: Checkout plugin sources
         uses: actions/checkout@v1
