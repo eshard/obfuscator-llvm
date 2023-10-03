@@ -14,17 +14,12 @@ jobs:
         with:
           path: src/ollvm
       - name: Compile plugin with LLVM 16
-        run: |
-          pwd
-          ls src
-          ls build
-          ls src/*
-          ls build/*
-          cmake \
-            -S src/llvm-16 \
-            -B build/llvm-16 \
-            -G Ninja \
-            -D CMAKE_VERBOSE_MAKEFILE=On \
-            -D LLVM_DIR=/usr/local/clang-install/lib/cmake \
-            -D BUILD_DUMMY=On
-          cmake --build build/llvm-16
+        run: pwd
+#           cmake \
+#             -S src/llvm-16 \
+#             -B build/llvm-16 \
+#             -G Ninja \
+#             -D CMAKE_VERBOSE_MAKEFILE=On \
+#             -D LLVM_DIR=/usr/local/clang-install/lib/cmake \
+#             -D BUILD_DUMMY=On
+#           cmake --build build/llvm-16
