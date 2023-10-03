@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout plugin sources
         uses: actions/checkout@v1
+        with:
+          path: src/ollvm
       - name: Compile plugin with LLVM 16
         run: |
           cmake \
