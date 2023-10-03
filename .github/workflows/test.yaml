@@ -4,13 +4,13 @@ jobs:
   build-with-llvm:
     runs-on: self-hosted
     container:
-      image: registry:443/clang-debian12:staging
+      image: registry:443/clang-debian11:staging
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     steps:
       - name: Checkout plugin sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v1
         with:
           path: src/ollvm
 
