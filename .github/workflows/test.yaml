@@ -15,6 +15,11 @@ jobs:
           path: src/ollvm
       - name: Compile plugin with LLVM 16
         run: |
+          pwd
+          ls src
+          ls build
+          ls src/*
+          ls build/*
           cmake \
             -S src/llvm-16 \
             -B build/llvm-16 \
