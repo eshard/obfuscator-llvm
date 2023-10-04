@@ -13,6 +13,8 @@ jobs:
         uses: actions/checkout@v1
         with:
           path: src/ollvm
+      - name: Test bash
+        run: bash -c "pwd"
       - name: Compile plugin with LLVM 16
         run: pwd
 #           cmake \
