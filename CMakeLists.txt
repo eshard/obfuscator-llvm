@@ -56,3 +56,5 @@ add_subdirectory(bogus)
 add_subdirectory(flattening)
 add_subdirectory(split)
 add_subdirectory(substitution)
+
+add_subdirectory(string)

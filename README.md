@@ -50,6 +50,9 @@ You can chose to insert passes in the optimization pipeline by setting the follo
 For instance if you want to run the flattening, bogus and substitution passes in that order, you can do:
 `export LLVM_OBF_SCALAROPTIMIZERLATE_PASSES="flattening, bogus, substitution, split-basic-blocks"`
 
+Or you can run the string encryption pass with:
+`export LLVM_OBF_OPTIMIZERLASTEP_PASSES="string"`
+
 Refer to the llvm::PassBuilder documentation for more information on each insertion point.
 
 ### With opt
