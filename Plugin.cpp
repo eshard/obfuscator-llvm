@@ -124,7 +124,12 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // Add optimization right after passes that do basic simplification of
         // the input IR.
         PB.registerPipelineEarlySimplificationEPCallback(
-            [](ModulePassManager &MPM, OptimizationLevel O) {
+            [](ModulePassManager &MPM, OptimizationLevel O
+#if LLVM_VERSION_MAJOR >= 20
+              ,
+              ThinOrFullLTOPhase
+#endif
+              ) {
               addPassesFromEnvVar(
                   MPM, EnvVarPrefix + "PIPELINEEARLYSIMPLIFICATION_PASSES");
             });
@@ -134,7 +139,12 @@ extern "C" PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() {
         // Add optimizations at the very end of the function optimization
         // pipeline.
         PB.registerOptimizerLastEPCallback(
-            [](ModulePassManager &MPM, OptimizationLevel O) {
+            [](ModulePassManager &MPM, OptimizationLevel O
+#if LLVM_VERSION_MAJOR >= 20
+               ,
+               ThinOrFullLTOPhase
+#endif
+              ) {
               addPassesFromEnvVar(MPM, EnvVarPrefix + "OPTIMIZERLASTEP_PASSES");
             });
 #else
