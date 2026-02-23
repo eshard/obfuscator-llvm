@@ -251,7 +251,7 @@ void BogusControlFlow::addBogusFlow(BasicBlock *basicBlock, Function &F) {
   // part, because they actually are updated in the second part according to
   // them.
   BasicBlock::iterator i1 = basicBlock->begin();
-  if (basicBlock->getFirstNonPHIOrDbgOrLifetime())
+  if (&*basicBlock->getFirstNonPHIOrDbgOrLifetime())
     i1 = (BasicBlock::iterator)basicBlock->getFirstNonPHIOrDbgOrLifetime();
 
   /* TODO: find a real fix or try with the probe-stack inline-asm when its
