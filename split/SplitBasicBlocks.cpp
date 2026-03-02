@@ -96,7 +96,7 @@ void SplitBasicBlock::split(Function *f) {
     }
 
     // Check splitN and current BB size
-    if ((size_t)splitN > curr->size()) {
+    if ((size_t)splitN >= curr->size()) {
       splitN = curr->size() - 1;
     }
 
