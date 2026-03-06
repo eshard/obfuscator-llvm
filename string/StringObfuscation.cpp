@@ -109,7 +109,7 @@ bool StringObfuscatorPass::encodeAllStrings(Module &M) {
     // Encode the value and update the variable
     if (isa<ConstantDataArray>(initializer)) { // Global variable
       auto array = cast<ConstantDataArray>(initializer);
-      if (array->isString()) {
+      if (array->isCString()) {
         encodeGlobalString(ctx, &gv, array);
       }
     } else if (isa<ConstantStruct>(initializer)) { // Variable in a struct
@@ -118,7 +118,7 @@ bool StringObfuscatorPass::encodeAllStrings(Module &M) {
         auto operand = cs->getOperand(i);
         if (isa<ConstantDataArray>(operand)) {
           auto array = cast<ConstantDataArray>(operand);
-          if (array->isString()) {
+          if (array->isCString()) {
             encodeStructString(ctx, &gv, cs, array, i);
           }
         }
