@@ -2,7 +2,7 @@ find_program(XXD xxd)
 
 # If defined, use the target compiler.
 # For cross-compilation the LLVM-IR generated is still arch specific.
-if (NOT ${TARGET_C_COMPILER})
+if (TARGET_C_COMPILER)
     set(CLANG ${TARGET_C_COMPILER})
 else()
     set(CLANG "${LLVM_TOOLS_BINARY_DIR}/clang")
