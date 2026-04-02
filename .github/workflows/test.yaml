@@ -1,0 +1,28 @@
+name: test-docker
+on: push
+jobs:
+  build-with-llvm:
+    runs-on: self-hosted
+    container:
+      #image: registry:443/clang-debian12:staging
+      image: clang-debian12:staging
+#      credentials:
+#        username: ${{ secrets.REGISTRY_USERNAME }}
+#        password: ${{ secrets.REGISTRY_PASSWORD }}
+    steps:
+      - name: Checkout plugin sources
+        uses: actions/checkout@v1
+        with:
+          path: src/ollvm
+      - name: Test bash
+        run: bash -c "pwd"
+      - name: Compile plugin with LLVM 16
+        run: pwd
+#           cmake \
+#             -S src/llvm-16 \
+#             -B build/llvm-16 \
+#             -G Ninja \
+#             -D CMAKE_VERBOSE_MAKEFILE=On \
+#             -D LLVM_DIR=/usr/local/clang-install/lib/cmake \
+#             -D BUILD_DUMMY=On
+#           cmake --build build/llvm-16
