@@ -134,7 +134,8 @@ std::string StringObfuscatorPass::generateRandomName() {
   auto charsetSize = strlen(ALPHANUM) - 1;
 
   auto size =
-      MIN(cryptoutils->get_uint8_t() + RandomNameMinSize, RandomMaxNameSize);
+      cryptoutils->get_range(RandomMaxNameSize - RandomNameMinSize) +
+      RandomNameMinSize;
   for (unsigned int i = 0; i < size; i++) {
     auto index = cryptoutils->get_range(charsetSize);
     name += ALPHANUM[index];
