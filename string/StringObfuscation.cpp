@@ -28,15 +28,6 @@ ConstantDataArray *StringObfuscatorPass::encodeStringDataArray(LLVMContext &ctx,
                                                                const char *str,
                                                                size_t size,
                                                                uint8_t key) {
-  // Check this is a valid string (not containing zeros)
-  if (str[size - 1] == '\0') {
-    if (strnlen(str, size) != size - 1)
-      return nullptr;
-  } else {
-    if (strnlen(str, size) != size)
-      return nullptr;
-  }
-
   // Encode the data
   char *encodedStr = (char *)malloc(size);
   for (unsigned int i = 0; i < size; i++) {
@@ -94,10 +85,11 @@ bool StringObfuscatorPass::encodeAllStrings(Module &M) {
 
   // For each global variable
   for (GlobalVariable &gv : M.globals()) {
-    if (!gv.isConstant()                         // constant
-        || !gv.hasInitializer()                  // unitialized
-        || gv.hasExternalLinkage()               // external
-        || gv.getSection() == "llvm.metadata") { // Intrinsic Global Variables
+    if (!gv.isConstant()                           // constant
+        || !gv.hasInitializer()                    // unitialized
+        || gv.hasExternalLinkage()                 // external
+        || gv.getAlign().valueOrOne().value() != 1 // align == 1
+        || gv.getSection() == "llvm.metadata") {   // Intrinsic Global Variables
       //|| gv.getSection().find("__objc_methname") != string::npos) { // TODO :
       // is this necessary ?
       continue;
@@ -109,7 +101,7 @@ bool StringObfuscatorPass::encodeAllStrings(Module &M) {
     // Encode the value and update the variable
     if (isa<ConstantDataArray>(initializer)) { // Global variable
       auto array = cast<ConstantDataArray>(initializer);
-      if (array->isCString()) {
+      if (array->isString()) {
         encodeGlobalString(ctx, &gv, array);
       }
     } else if (isa<ConstantStruct>(initializer)) { // Variable in a struct
@@ -118,7 +110,7 @@ bool StringObfuscatorPass::encodeAllStrings(Module &M) {
         auto operand = cs->getOperand(i);
         if (isa<ConstantDataArray>(operand)) {
           auto array = cast<ConstantDataArray>(operand);
-          if (array->isCString()) {
+          if (array->isString()) {
             encodeStructString(ctx, &gv, cs, array, i);
           }
         }
