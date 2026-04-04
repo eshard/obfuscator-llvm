@@ -30,11 +30,13 @@ struct GlobalStringVariable {
   }
 };
 
+
 namespace llvm {
 struct StringObfuscatorPass : public PassInfoMixin<StringObfuscatorPass> {
   std::vector<GlobalStringVariable> globalStrings;
+  size_t maxSize;
 
-  StringObfuscatorPass();
+  StringObfuscatorPass(size_t maxSize);
   ConstantDataArray *encodeStringDataArray(LLVMContext &ctx, const char *str,
                                            size_t size, uint8_t key);
   void encodeStructString(LLVMContext &ctx, GlobalVariable *gv,

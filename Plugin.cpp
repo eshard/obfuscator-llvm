@@ -45,7 +45,9 @@ bool addPassWithName(FunctionPassManager &FPM, StringRef &passName) {
 
 bool addPassWithName(ModulePassManager &MPM, StringRef &passName) {
   if (passName == "string-encryption") {
-    MPM.addPass(StringObfuscatorPass());
+    size_t maxSize = 0;
+    getEnvVar(EnvVarPrefix + "MAX_STRING_LENGTH").getAsInteger(10, maxSize);
+    MPM.addPass(StringObfuscatorPass{maxSize});
   } else {
     return false;
   }

@@ -55,6 +55,9 @@ Or you can run the string encryption pass with:
 
 Refer to the llvm::PassBuilder documentation for more information on each insertion point.
 
+You can limit the length of strings that are obfuscated with the `LLVM_OBF_MAX_STRING_LENGTH` environment variable. A 
+value of 0 (the default) means no limit.
+
 ### With opt
 
 [`opt`](https://llvm.org/docs/CommandGuide/opt.html) can be used to apply specific passes from LLRM-IR you
