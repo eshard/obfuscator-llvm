@@ -601,8 +601,7 @@ bool BogusControlFlow::doF(Module &M) {
     for (Function::iterator fi = mi->begin(), fe = mi->end(); fi != fe; ++fi) {
       // fi->setName("");
       Instruction *tbb = fi->getTerminator();
-      if (tbb->getOpcode() == Instruction::Br) {
-        BranchInst *br = (BranchInst *)(tbb);
+      if (auto *br = dyn_cast<BranchInst>(tbb)) {
         if (br->isConditional()) {
           FCmpInst *cond = (FCmpInst *)br->getCondition();
           unsigned opcode = cond->getOpcode();
